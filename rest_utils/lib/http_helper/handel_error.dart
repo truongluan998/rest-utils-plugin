@@ -13,14 +13,13 @@ abstract class Failure extends Equatable {
 }
 
 class GeneralFailure extends Failure {
-  const GeneralFailure(String errorCode, String message)
-      : super(errorCode, message);
+  const GeneralFailure(String errorCode, String message) : super(errorCode, message);
 }
 
 class ApiFailure extends Failure {
   final int statusCode;
-  const ApiFailure(this.statusCode, String errorCode, String message)
-      : super(errorCode, message);
+
+  const ApiFailure(this.statusCode, String errorCode, String message) : super(errorCode, message);
 
   factory ApiFailure.fromJson(Map<String, dynamic> json, int statusCode) =>
       ApiFailure(statusCode, json['errorCode'] as String? ?? '', '');
@@ -54,32 +53,19 @@ class ExceptionHandle {
     unauthorized: const ApiFailure(unauthorized, 'un_authorized', 'Unauthorized'),
     netError: const ApiFailure(netError, 'network_error', 'Network Error'),
     parseError: const ApiFailure(parseError, 'parse_error', 'Parse Error'),
-    socketError: const ApiFailure(socketError, 'socket_error',
-        'Bạn đang mất kết nối mạng. Vui lòng kiểm tra lại đường truyền.'),
+    socketError: const ApiFailure(socketError, 'socket_error', 'Socket Error'),
     httpError: const ApiFailure(httpError, 'http_error', 'Http Error'),
-    connectTimeoutError: const ApiFailure(
-        connectTimeoutError,
-        'connect_timeout',
-        'Vui lòng liên hệ với trung tâm hỗ trợ kỹ thuật để được hỗ trợ.'),
-    sendTimeoutError: const ApiFailure(
-        sendTimeoutError, 'sent_timeout', 'Send Timeout Error'),
-    receiveTimeoutError: const ApiFailure(
-        receiveTimeoutError, 'receive_timeout', 'Không nhận được phản hồi từ máy chủ.'),
+    connectTimeoutError: const ApiFailure(connectTimeoutError, 'connect_timeout', 'Xonnect Timeout'),
+    sendTimeoutError: const ApiFailure(sendTimeoutError, 'sent_timeout', 'Send Timeout Error'),
+    receiveTimeoutError: const ApiFailure(receiveTimeoutError, 'receive_timeout', 'Receive Timeout'),
     cancelError: const ApiFailure(cancelError, 'cancel_error', 'Cancel Error'),
-    internalServerError: const ApiFailure(
-        internalServerError, 'internal_server_error', 'Đã có lỗi xảy ra.'),
-    forbidden: const ApiFailure(
-        forbidden, 'forbidden', 'Bạn không có quyền xem nội dung này.'),
-    notFound:
-        const ApiFailure(notFound, 'not_found', 'Không tìm thấy nội dung.'),
-    badGateway: const ApiFailure(
-        badGateway, 'bad_gateway', 'Không kết nối được với máy chủ.'),
-    serviceUnavailable: const ApiFailure(
-        serviceUnavailable, 'service_unavailable', 'Dịch vụ không khả dụng.'),
-    gatewayTimeout: const ApiFailure(gatewayTimeout, 'gateway_timeout',
-        'Không nhận được phản hồi từ máy chủ.')
+    internalServerError: const ApiFailure(internalServerError, 'internal_server_error', 'Internal Server Error'),
+    forbidden: const ApiFailure(forbidden, 'forbidden', 'Forbidden'),
+    notFound: const ApiFailure(notFound, 'not_found', 'Not Found'),
+    badGateway: const ApiFailure(badGateway, 'bad_gateway', 'Bad Gateway'),
+    serviceUnavailable: const ApiFailure(serviceUnavailable, 'service_unavailable', 'Service Unavailable'),
+    gatewayTimeout: const ApiFailure(gatewayTimeout, 'gateway_timeout', 'Gateway Timeout')
   };
-
 
   static ApiFailure handleException(error) {
     if (error is DioError) {
@@ -104,8 +90,7 @@ class ExceptionHandle {
     if (error is FormatException) {
       errorCode = parseError;
     }
-    return _errorMap[errorCode] ??
-        ApiFailure(errorCode, 'unknown_error', 'Unknown Error');
+    return _errorMap[errorCode] ?? ApiFailure(errorCode, 'unknown_error', 'Unknown Error');
   }
 }
 

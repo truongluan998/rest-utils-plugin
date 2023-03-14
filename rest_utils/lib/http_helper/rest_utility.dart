@@ -3,7 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 
 import '../models/base_service_model.dart';
-import 'http_helper.dart';
+import 'handel_error.dart';
+import 'interceptor.dart';
 
 enum Method { get, post, put, patch, delete }
 
