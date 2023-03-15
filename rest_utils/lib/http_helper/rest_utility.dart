@@ -4,13 +4,8 @@ import 'package:get_it/get_it.dart';
 
 import '../models/base_service_model.dart';
 import 'handel_error.dart';
-import 'interceptor.dart';
 
 enum Method { get, post, put, patch, delete }
-
-extension MethodExtension on Method {
-  String get value => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'][index];
-}
 
 Duration _connectTimeout = const Duration(milliseconds: 30000);
 Duration _receiveTimeout = const Duration(milliseconds: 30000);
@@ -33,9 +28,6 @@ class RestUtil {
       baseUrl: baseUrl,
     );
     dio = Dio(options);
-
-    /// Add default header interceptor
-    dio.interceptors.add(DefaultHeaderInterceptor());
 
     void addInterceptor(Interceptor interceptor) {
       dio.interceptors.add(interceptor);
@@ -60,7 +52,7 @@ class RestUtil {
         path,
         data: jsonEncode(request!.toJson()),
         queryParameters: queryParameters,
-        options: _checkOptions(method.value, options),
+        options: _checkOptions(method.name, options),
         cancelToken: cancelToken,
       );
       final response = GetIt.instance.get<TResponse>();
@@ -79,7 +71,7 @@ class RestUtil {
       }
       return response;
     } on DioError catch (e) {
-      print('Exception: ${ExceptionHandle.handleException(e)}');
+      ExceptionHandle.handleException(e);
       throw Exception(e.message);
     }
   }
