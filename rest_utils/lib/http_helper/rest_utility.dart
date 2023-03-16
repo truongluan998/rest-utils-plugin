@@ -1,15 +1,13 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
 
+import '../common/constants.dart';
+import '../common/enum.dart';
 import '../models/base_service_model.dart';
 import 'handel_error.dart';
 
-enum Method { get, post, put, patch, delete }
-
-Duration _connectTimeout = const Duration(milliseconds: 30000);
-Duration _receiveTimeout = const Duration(milliseconds: 30000);
-Duration _sendTimeout = const Duration(milliseconds: 10800);
 
 class RestUtil {
   late Dio dio;
@@ -22,9 +20,9 @@ class RestUtil {
     List<Interceptor>? interceptors,
   }) {
     final options = BaseOptions(
-      connectTimeout: connectTimeout ?? _connectTimeout,
-      receiveTimeout: receiveTimeout ?? _receiveTimeout,
-      sendTimeout: sendTimeout ?? _sendTimeout,
+      connectTimeout: connectTimeout ?? Constants.connectTimeout,
+      receiveTimeout: receiveTimeout ?? Constants.receiveTimeout,
+      sendTimeout: sendTimeout ?? Constants.sendTimeout,
       baseUrl: baseUrl,
     );
     dio = Dio(options);
@@ -71,7 +69,7 @@ class RestUtil {
       }
       return response;
     } on DioError catch (e) {
-      ExceptionHandle.handleException(e);
+      debugPrint('Exception: ${ExceptionHandle.fromDioError(e).toString()}');
       throw Exception(e.message);
     }
   }

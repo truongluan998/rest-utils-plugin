@@ -1,39 +1,53 @@
 import 'package:dio/dio.dart';
 
-class ExceptionHandle {
-  static const int success = 200;
-  static const int successNotContent = 204;
-  static const int multipleChoice = 300;
-  static const int notModified = 304;
-  static const int unauthorized = 401;
-  static const int forbidden = 403;
-  static const int notFound = 404;
-  static const int badRequest = 400;
-  static const int internalServerError = 500;
-  static const int badGateway = 502;
-  static const int serviceUnavailable = 503;
-  static const int gatewayTimeout = 504;
+class ExceptionHandle implements Exception {
+  var message = '';
 
-  static const int netError = 1000;
-  static const int parseError = 1001;
-  static const int socketError = 1002;
-  static const int httpError = 1003;
-  static const int connectTimeoutError = 1004;
-  static const int sendTimeoutError = 1005;
-  static const int receiveTimeoutError = 1006;
-  static const int cancelError = 1007;
-  static const int unknownError = 9999;
-
-  /// TODO: Implement in future
-  static String handleException(error) {
-    if (error is DioError) {
-      if (error.response?.statusCode == 0) {
-        return '';
-      } else {
-        return '';
-      }
-    } else {
-      return '';
+  ExceptionHandle.fromDioError(DioError dioError) {
+    switch (dioError.type) {
+      case DioErrorType.cancel:
+        message = 'Request to API server was cancelled';
+        break;
+      case DioErrorType.connectionTimeout:
+        message = 'Connection timeout with API server';
+        break;
+      case DioErrorType.connectionError:
+        message = 'Connection to API server failed due to internet connection';
+        break;
+      case DioErrorType.receiveTimeout:
+        message = 'Receive timeout in connection with API server';
+        break;
+      case DioErrorType.badResponse:
+        message = _handleError(dioError.response?.statusCode ?? 0, dioError.response?.data);
+        break;
+      case DioErrorType.sendTimeout:
+        message = 'Send timeout in connection with API server';
+        break;
+      case DioErrorType.badCertificate:
+        message = 'Bad certificate';
+        break;
+      case DioErrorType.unknown:
+        message = 'Something went wrong';
+        break;
+      default:
+        message = 'Something went wrong';
+        break;
     }
   }
+
+  String _handleError(int statusCode, dynamic error) {
+    switch (statusCode) {
+      case 400:
+        return 'Bad request';
+      case 404:
+        return error["message"];
+      case 500:
+        return 'Internal server error';
+      default:
+        return 'Oops something went wrong';
+    }
+  }
+
+  @override
+  String toString() => message;
 }
