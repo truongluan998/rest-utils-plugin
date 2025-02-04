@@ -68,7 +68,7 @@ class RestUtil {
         return newResponse;
       }
       return response;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       debugPrint('Exception: ${ExceptionHandle.fromDioError(e).toString()}');
       throw Exception(e.message);
     }

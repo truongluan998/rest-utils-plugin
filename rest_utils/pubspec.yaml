@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^5.0.0
-  get_it: ^7.2.0
+  get_it: ^8.0.3
 
 dev_dependencies:
   flutter_test:
