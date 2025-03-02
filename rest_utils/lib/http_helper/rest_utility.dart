@@ -30,18 +30,17 @@ class RestUtil {
     }
   }
 
-  Future<TResponse> request<TRequest extends BaseRequestModel,
-  TResponse extends BaseResponseModel>(
+  Future<TResponse> request<TRequest, TResponse>(
       String path,
       Method method, {
         TRequest? request,
         Map<String, dynamic>? queryParameters,
         CancelToken? cancelToken,
         Options? options,
-        required TResponse Function(Map<String, dynamic>) fromJson,
+        required TResponse Function(dynamic) fromJson,
       }) async {
     try {
-      final requestData = request != null ? jsonEncode(request.toJson()) : null;
+      final requestData = request is BaseRequestModel ? jsonEncode(request.toJson()) : null;
 
       final response = await dio.request(
         path,
@@ -51,22 +50,11 @@ class RestUtil {
         cancelToken: cancelToken,
       );
 
-      final responseModel = fromJson(response.data)
-        ..statusCode = response.statusCode
-        ..errorCode = response.statusCode.toString()
-        ..errorMessage = response.statusMessage;
-
-      return responseModel;
+      return fromJson(response.data);
     } on DioException catch (e) {
       final errorDetails = ExceptionHandle.fromDioError(e);
-      debugPrint(errorDetails.toString());
-
-      throw DioException(
-        requestOptions: e.requestOptions,
-        response: e.response,
-        type: e.type,
-        error: errorDetails.message,
-      );
+      debugPrint('DioException: ${errorDetails.toString()}');
+      throw errorDetails;
     }
   }
 
