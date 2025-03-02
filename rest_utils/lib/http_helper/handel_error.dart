@@ -1,53 +1,70 @@
 import 'package:dio/dio.dart';
 
 class ExceptionHandle implements Exception {
-  var message = '';
+  final String message;
+  final int? statusCode;
 
-  ExceptionHandle.fromDioError(DioError dioError) {
+  ExceptionHandle({required this.message, this.statusCode});
+
+  factory ExceptionHandle.fromDioError(DioException dioError) {
+    String errorMessage;
+    int? statusCode;
+
     switch (dioError.type) {
       case DioExceptionType.cancel:
-        message = 'Request to API server was cancelled';
+        errorMessage = 'Request to API server was cancelled';
         break;
       case DioExceptionType.connectionTimeout:
-        message = 'Connection timeout with API server';
+        errorMessage = 'Connection timeout with API server';
         break;
       case DioExceptionType.connectionError:
-        message = 'Connection to API server failed due to internet connection';
+        errorMessage = 'Failed to connect to API server. Check your internet connection';
         break;
       case DioExceptionType.receiveTimeout:
-        message = 'Receive timeout in connection with API server';
-        break;
-      case DioExceptionType.badResponse:
-        message = _handleError(dioError.response?.statusCode ?? 0, dioError.response?.data);
+        errorMessage = 'Receive timeout in connection with API server';
         break;
       case DioExceptionType.sendTimeout:
-        message = 'Send timeout in connection with API server';
+        errorMessage = 'Send timeout in connection with API server';
         break;
       case DioExceptionType.badCertificate:
-        message = 'Bad certificate';
+        errorMessage = 'Bad certificate';
+        break;
+      case DioExceptionType.badResponse:
+        statusCode = dioError.response?.statusCode;
+        errorMessage = _handleError(statusCode, dioError.response?.data);
         break;
       case DioExceptionType.unknown:
-        message = 'Something went wrong';
-        break;
       default:
-        message = 'Something went wrong';
+        errorMessage = 'An unexpected error occurred. Please try again later.';
         break;
     }
+
+    return ExceptionHandle(message: errorMessage, statusCode: statusCode);
   }
 
-  String _handleError(int statusCode, dynamic error) {
+  static String _handleError(int? statusCode, dynamic error) {
+    if (error == null || error is! Map<String, dynamic>) {
+      return 'Unexpected server response';
+    }
+
     switch (statusCode) {
       case 400:
-        return 'Bad request';
+        return error["message"] ?? 'Bad request';
+      case 401:
+        return 'Unauthorized request. Please check your credentials.';
+      case 403:
+        return 'Forbidden request. You do not have permission to access this resource.';
       case 404:
-        return error["message"];
+        return error["message"] ?? 'Requested resource not found';
+      case 422:
+        return error["message"] ?? 'Invalid input data';
       case 500:
-        return 'Internal server error';
+        return 'Internal server error. Please try again later.';
       default:
-        return 'Oops something went wrong';
+        return error["message"] ?? 'An unexpected error occurred';
     }
   }
 
   @override
-  String toString() => message;
+  String toString() => 'Error $statusCode: $message';
 }
